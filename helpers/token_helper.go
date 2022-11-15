@@ -19,7 +19,7 @@ type SignedDetails struct {
 	Name     string
 	UserId   string
 	UserType string
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 }
 
 var user_collection *mongo.Collection = db.OpenCollection(db.Client, "user")
@@ -46,7 +46,7 @@ func ValidateToken(signed_token string) (claims *SignedDetails, msg string) {
 		return
 	}
 
-	if claims.ExpiresAt < time.Now().Local().Unix() {
+	if claims.ExpiresAt.Unix() < time.Now().Local().Unix() {
 		msg = "Token is expired"
 		return
 	}
@@ -93,19 +93,19 @@ func GenerateAllTokens(email string, name string, user_type string, user_id stri
 		Name:     name,
 		UserType: user_type,
 		UserId:   user_id,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Local().Add(time.Hour * 24).Unix(),
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Local().Add(time.Hour * 24)),
 		},
 	}
 
 	refresh_claims := &SignedDetails{
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Local().Add(time.Hour * 168).Unix(),
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Local().Add(time.Hour * 168)),
 		},
 	}
 
-	token, _ := jwt.NewWithClaims(jwt.SigningMethodES256, claims).SignedString([]byte(SECRET_KEY))
-	refresh_token, err := jwt.NewWithClaims(jwt.SigningMethodES256, refresh_claims).SignedString([]byte(SECRET_KEY))
+	token, _ := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(SECRET_KEY))
+	refresh_token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, refresh_claims).SignedString([]byte(SECRET_KEY))
 
 	return token, refresh_token, err
 }
