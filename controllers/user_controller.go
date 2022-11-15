@@ -75,6 +75,7 @@ func Signup() gin.HandlerFunc {
 
 		if count > 0 {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "this email already exists"})
+			return
 		}
 
 		user.CreatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
@@ -124,12 +125,6 @@ func Login() gin.HandlerFunc {
 
 		token, refresh_token, _ := helpers.GenerateAllTokens(*found_user.Email, *found_user.Name, *found_user.UserType, found_user.UserId)
 		helpers.UpdateAllTokens(token, refresh_token, found_user.UserId)
-
-		err = user_collection.FindOne(ctx, bson.M{"user_id": found_user.UserId}).Decode(&found_user)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
 
 		c.JSON(http.StatusOK, found_user)
 	}

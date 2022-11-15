@@ -66,11 +66,8 @@ func UpdateAllTokens(signed_token string, signed_refresh_token string, user_id s
 	updated_at, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	update_obj = append(update_obj, bson.E{Key: "updated_at", Value: updated_at})
 
-	upsert := true
-	filter := bson.M{"user_id": user_id}
-	opt := options.UpdateOptions{
-		Upsert: &upsert,
-	}
+	filter := bson.D{{Key: "user_id", Value: user_id}}
+	opt := options.Update().SetUpsert(true)
 
 	_, err := user_collection.UpdateOne(
 		ctx,
@@ -78,7 +75,7 @@ func UpdateAllTokens(signed_token string, signed_refresh_token string, user_id s
 		bson.D{
 			{Key: "$set", Value: update_obj},
 		},
-		&opt,
+		opt,
 	)
 
 	if err != nil {
