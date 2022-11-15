@@ -2,7 +2,7 @@ package helpers
 
 import (
 	"context"
-	"golang-jwt/api"
+	"golang-jwt/config"
 	"golang-jwt/db"
 	"log"
 	"time"
@@ -24,7 +24,7 @@ type SignedDetails struct {
 
 var user_collection *mongo.Collection = db.OpenCollection(db.Client, "user")
 
-var SECRET_KEY string = api.GetSecret()
+var SECRET_KEY string = config.GetSecret()
 
 func ValidateToken(signed_token string) (claims *SignedDetails, msg string) {
 	token, err := jwt.ParseWithClaims(
@@ -104,7 +104,7 @@ func GenerateAllTokens(email string, name string, user_type string, user_id stri
 		},
 	}
 
-	token, err := jwt.NewWithClaims(jwt.SigningMethodES256, claims).SignedString([]byte(SECRET_KEY))
+	token, _ := jwt.NewWithClaims(jwt.SigningMethodES256, claims).SignedString([]byte(SECRET_KEY))
 	refresh_token, err := jwt.NewWithClaims(jwt.SigningMethodES256, refresh_claims).SignedString([]byte(SECRET_KEY))
 
 	return token, refresh_token, err

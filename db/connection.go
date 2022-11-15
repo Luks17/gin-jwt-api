@@ -2,7 +2,7 @@ package db
 
 import (
 	"context"
-	"golang-jwt/api"
+	"golang-jwt/config"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -11,7 +11,7 @@ import (
 var Client *mongo.Client = Connect()
 
 func Connect() *mongo.Client {
-	uri := api.GetUri()
+	uri := config.GetUri()
 
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 
